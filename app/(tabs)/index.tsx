@@ -1,98 +1,249 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function JetXScreen() {
+  const [time, setTime] = useState('');
+  const [hash, setHash] = useState('');
+  const [multi, setMulti] = useState('');
+  const [prediction, setPrediction] = useState<number | null>(5.19);
+  const [percent, setPercent] = useState(34);
 
-export default function HomeScreen() {
+
+  const rand = (min: number, max: number) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  const randTime = (s: number) => {
+    let d = new Date();
+    d.setSeconds(d.getSeconds() + s);
+    return d.toLocaleTimeString();
+  }
+
+  const [history, setHistory] = useState([
+    { time: randTime(20), hash: 'A1B2C3D4E5', result: `${rand(1.13,2.51).toFixed(2)}` },
+    { time: randTime(40), hash: 'F6G7H8I9J0', result: `${rand(1.30,3.78).toFixed(2)}` },
+    { time: randTime(60), hash: 'K1L2M3N4O5', result: `${rand(1.90,6.32).toFixed(2)}` },
+  ]);
+
+  const handlePredict = () => {
+    if (!time || !hash || !multi) {
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+    const seed = hash
+      .split('')
+      .reduce((a, c) => a + c.charCodeAt(0), 0);
+
+    const result = ((seed % 500) / 100).toFixed(2);
+    const val = Math.max(1.2, parseFloat(result));
+
+    setPrediction(val);
+    setPercent(Math.floor((val / 10) * 100));
+    let newEntry = [
+      { time: randTime(20), hash: 'A1B2C3D4E5', result: `${rand(1.13,2.51).toFixed(2)}` },
+      { time: randTime(40), hash: 'F6G7H8I9J0', result: `${rand(1.30,3.78).toFixed(2)}` },
+      { time: randTime(60), hash: 'K1L2M3N4O5', result: `${rand(1.90,6.32).toFixed(2)}` },
+    ];
+    newEntry.unshift({ time: randTime(1), hash, result: `${val}` });
+    setHistory(newEntry.slice(0, 3));
+  };
+
+
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <LinearGradient
+      colors={['#0a0015', '#1a0030', '#0a0015']}
+      style={styles.container}
+    >
+      <Text style={styles.title}>🚀 JET X 😎</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      {/* INPUT HEURE */}
+      <Text style={styles.label}>🕒 Heure (HH:MM:SS)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: 12:45:30"
+        placeholderTextColor="#777"
+        value={time}
+        onChangeText={setTime}
+      />
+
+      {/* INPUT HASH */}
+      <Text style={styles.label}>🧾 HASH</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: A7F9X2B9KQ"
+        placeholderTextColor="#777"
+        value={hash}
+        onChangeText={setHash}
+      />
+
+      {/* INPUT MULTI */}
+      <Text style={styles.label}>📜 Multiplicateur</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: 3"
+        placeholderTextColor="#777"
+        value={multi}
+        onChangeText={setMulti}
+        keyboardType="numeric"
+      />
+
+      {/* RESULT */}
+      <Text style={styles.result}>
+        x{prediction?.toFixed(2)}
+      </Text>
+
+      <Text style={styles.percent}>{percent}%</Text>
+
+      {/* PROGRESS BAR */}
+      <View style={styles.progressBar}>
+        <LinearGradient
+          colors={['#ff004c', '#00ff88']}
+          style={[styles.progressFill, { width: `${percent}%` }]}
+        />
+      </View>
+
+      {/* BUTTON */}
+      <TouchableOpacity onPress={handlePredict}>
+        <LinearGradient
+          colors={['#ff004c', '#00c6ff']}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>PRÉDICTION</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {/* FUTURE CARDS */}
+      <View style={styles.futureRow}>
+        {history.map((item, i) => (
+          <View key={i} style={styles.card}>
+            <Text style={styles.cardTime}>{item.time}</Text>
+            <Text style={styles.cardValue}>x{item.result}</Text>
+            <View style={styles.cardBar}>
+              <LinearGradient
+                colors={['#ff004c', '#00c6ff']}
+                style={styles.cardFill}
+              />
+            </View>
+          </View>
+        ))}
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+
+  title: {
+    textAlign: 'center',
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+
+  label: {
+    marginTop: 12,
+    marginBottom: 6,
+    color: '#aaa',
+    fontWeight: '600',
+  },
+
+  input: {
+    backgroundColor: '#ffffff0d',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+    color: '#fff',
+  },
+
+  result: {
+    fontSize: 48,
+    textAlign: 'center',
+    marginTop: 25,
+    fontWeight: 'bold',
+    color: '#FFD700',
+  },
+
+  percent: {
+    textAlign: 'center',
+    color: '#aaa',
+    marginBottom: 10,
+  },
+
+  progressBar: {
+    height: 8,
+    backgroundColor: '#ffffff1a',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+
+  progressFill: {
+    height: '100%',
+    borderRadius: 10,
+  },
+
+  button: {
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 30,
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  futureRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 25,
+  },
+
+  card: {
+    backgroundColor: '#ffffff0d',
+    padding: 12,
+    borderRadius: 15,
+    width: '30%',
+    alignItems: 'center',
+  },
+
+  cardTime: {
+    fontSize: 12,
+    color: '#aaa',
+  },
+
+  cardValue: {
+    fontWeight: 'bold',
+    marginVertical: 5,
+    color: '#fff',
+  },
+
+  cardBar: {
+    height: 4,
+    width: '100%',
+    backgroundColor: '#ffffff1a',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+
+  cardFill: {
+    width: '60%',
+    height: '100%',
   },
 });
