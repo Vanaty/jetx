@@ -1,14 +1,17 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
+import { LogOut } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-
 export default function JetXScreen() {
+  const { profile, signOut } = useAuth();
   const [time, setTime] = useState('');
   const [hash, setHash] = useState('');
   const [multi, setMulti] = useState('');
@@ -55,13 +58,35 @@ export default function JetXScreen() {
     setHistory(newEntry.slice(0, 3));
   };
 
-
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <LinearGradient
       colors={['#0a0015', '#1a0030', '#0a0015']}
       style={styles.container}
     >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>Bonjour,</Text>
+          <Text style={styles.username}>{profile?.display_name}</Text>
+          {profile?.expiration_date && (
+            <Text style={styles.expiration}>
+              Expire le:{' '}
+              {new Date(profile.expiration_date).toLocaleDateString('fr-FR')}
+            </Text>
+          )}
+        </View>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <LogOut color="#fff" size={24} />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.title}>🚀 JET X 😎</Text>
 
       {/* INPUT HEURE */}
@@ -135,6 +160,7 @@ export default function JetXScreen() {
           </View>
         ))}
       </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -143,6 +169,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  scrollContent: {
+    padding: 10,
+  },
+
+  logoutButton: {
+    padding: 8,
+  },
+
+  greeting: {
+    fontSize: 16,
+    color: '#999',
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+    marginTop: 48,
+  },
+
+  username: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+
+  expiration: {
+    fontSize: 12,
+    color: '#FFD700',
+    marginTop: 4,
   },
 
   title: {
